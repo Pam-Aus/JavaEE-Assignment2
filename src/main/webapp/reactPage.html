@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8" /> <title>Hello World</title>
+        <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+        <script async src="https://ga.jspm.io/npm:es-module-shims@1.7.0/dist/es-module-
+        shims.js"></script>
+        <script type="importmap">
+            {
+            "imports": {
+            "react": "https://esm.sh/react?dev",
+            "react-dom/client": "https://esm.sh/react-dom/client?dev"
+            }
+            }
+        </script>
+    </head>
+    <body>
+        <div id="root"></div>
+        <script type="text/babel" data-type="module" >
+import React, { useEffect, useState, StrictMode, useRef } from 'react';
+import { createRoot } from 'react-dom/client';
+function MyApp() {
+
+    const [bouncers, setBouncers] = useState([]);
+     const [selected, setSelected] = useState({});
+    useEffect(() => {
+        async function getContacts() {
+            let result = await fetch(
+                    "http://localhost:8080/bouncer-chi/resources/cst8218.austin.bouncer.entity.bouncer",
+                    {
+                        method: 'GET',
+                        headers: {'Accept': 'application/json'}
+                    });
+            const json = await result.json();
+            setBouncers(json);
+        };
+//getContacts();
+//now we set an interval to call getContacts every 300ms
+        const timeInterval = setInterval(getContacts, 300);
+//return a function to clean up if the user leaves the page
+        return () => clearInterval(timeInterval);
+    }, []);
+    const canvasRef = useRef(null);
+  useEffect(() => {
+    const ctx = canvasRef.current.getContext("2d");
+    ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+    ctx.fillStyle = "#0000FF";
+
+    bouncers.forEach(bouncer => {
+        // Assuming bouncer.XPosition and bouncer.YPosition are the center coordinates of the ball
+        const radius = 10; // Change the radius as needed
+        ctx.beginPath();
+        ctx.arc(bouncer.XPosition, bouncer.YPosition, radius, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.closePath();
+    });
+}, [bouncers]);
+
+    function handleClick(event, field, index) {
+        console.log(index);
+        setSelected({"index":index, "field":field, "value":event.target.value});
+    }
+
+    function handleChange(event, field, index) {
+        console.log(index);
+        setSelected({"index":index, "field":selected.field, "value":event.target.value});
+    }
+
+    const handleSubmit = (event) => {
+        console.log("here");
+        var newItem;
+        bouncers.map((bouncer, key) => {
+            console.log("here2");
+            if (key === selected.index) { //this is the one the user is changing
+                console.log("here3");
+                newItem = Object.assign({}, bouncer, {[selected.field]: selected.value}); //make a copy of the item to change
+                setSelected({}); // reset selected until next click/change
+                console.log("here4");
+                fetch("http://localhost:8080/bouncer-chi/resources/cst8218.austin.bouncer.entity.bouncer/" + bouncer.id, {
+                    method: 'PUT',
+                    body: JSON.stringify(newItem),
+                    headers: {'Content-type': 'application/json'}
+                })
+                 .then(res => res.text());
+            }
+        });
+        event.preventDefault();
+    };
+
+    return  <div>
+            <form onSubmit={handleSubmit}>
+                                <table>
+                                <tr><th>XPosition</th><th>YPosition</th><th>YVelocity</th>{selected.field !== null ? <th> new {selected.field}</th> : ""}</tr>
+                                    {bouncers.map((bouncer, key) => {
+                            return (
+                                    <tr>
+                          
+    <td> <input type="text" name={bouncer.id} value={bouncer.XPosition} onChange={(e) => handleChange(e, "XPosition", key)} onClick={(e) => handleClick(e, "XPosition", key)} /> </td>
+    <td> <input type="text" name={bouncer.id} value={bouncer.YPosition} onChange={(e) => handleChange(e, "YPosition", key)} onClick={(e) => handleClick(e, "YPosition", key)} /> </td>
+    <td> <input type="text" name={bouncer.id} value={bouncer.YVelocity} onChange={(e) => handleChange(e, "YVelocity", key)} onClick={(e) => handleClick(e, "YVelocity", key)} /> </td>
+{selected.index === key ? (<td><input id="selected" type="text" size="7" name="selected" autoFocus value={selected.value} onChange={(e) => handleChange(e, "selected", key)}/></td>) : ""}
+</tr>
+                                    );
+                        })}
+{selected.index !== null ? (<tr><td></td><td> </td><td><input type="submit" value="Submit" /></td></tr>)
+                                :
+                                      (<tr><td></td></tr>)}
+                </table>
+              </form>
+              <canvas
+                ref={canvasRef}
+                width={2000}
+                height={2000}
+                />
+              </div>
+
+}
+const container = document.getElementById('root');
+const root = createRoot(container);
+root.render(<MyApp />);
+</script>
+</body>
+</html>
