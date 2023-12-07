@@ -6,8 +6,11 @@ import cst8218.austin.bouncer.presentation.util.JsfUtil;
 import cst8218.austin.bouncer.presentation.util.PaginationHelper;
 
 import java.io.Serializable;
+import java.util.Locale;
 import java.util.ResourceBundle;
+import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
+import javax.ejb.Local;
 import javax.inject.Named;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.component.UIComponent;
@@ -19,13 +22,17 @@ import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
 
 /**
- * This is the controller class from MVC architecture, used to manage instances of Bouncer, interacting with BouncerFacade for providing access
- * to the database and performing required operations.
+ * This is the controller class from MVC architecture, used to manage instances
+ * of Bouncer, interacting with BouncerFacade for providing access to the
+ * database and performing required operations.
+ *
  * @author chiaustin
  */
 @Named("bouncerController")
 @SessionScoped
 public class BouncerController implements Serializable {
+
+    private Locale locale;
 
     private Bouncer current;
     private DataModel items = null;
@@ -35,6 +42,24 @@ public class BouncerController implements Serializable {
     private int selectedItemIndex;
 
     public BouncerController() {
+    }
+
+    @PostConstruct
+    public void init() {
+        locale = FacesContext.getCurrentInstance().getExternalContext().getRequestLocale();
+    }
+
+    public Locale getLocale() {
+        return locale;
+    }
+
+    public String getLanguage() {
+        return locale.getLanguage();
+    }
+
+    public void setLanguage(String language) {
+        locale = new Locale(language);
+        FacesContext.getCurrentInstance().getViewRoot().setLocale(locale);
     }
 
     public Bouncer getSelected() {

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+     <f:view locale="#{bouncerController.locale}">
     <head>
         <meta charset="UTF-8" /> <title>Hello World</title>
         <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -14,7 +15,9 @@
             }
         </script>
     </head>
+    
     <body>
+        
         <div id="root"></div>
         <script type="text/babel" data-type="module" >
 import React, { useEffect, useState, StrictMode, useRef } from 'react';
@@ -88,6 +91,7 @@ function MyApp() {
     };
 
     return  <div>
+    
             <form onSubmit={handleSubmit}>
                                 <table>
                                 <tr><th>XPosition</th><th>YPosition</th><th>YVelocity</th>{selected.field !== null ? <th> new {selected.field}</th> : ""}</tr>
@@ -112,6 +116,7 @@ function MyApp() {
                 width={2000}
                 height={2000}
                 />
+               
               </div>
 
 }
@@ -119,5 +124,7 @@ const container = document.getElementById('root');
 const root = createRoot(container);
 root.render(<MyApp />);
 </script>
+
 </body>
+</f:view>
 </html>
